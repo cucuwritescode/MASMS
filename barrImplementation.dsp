@@ -1,7 +1,7 @@
 import("stdfaust.lib");
 declare name "NestedKeith";
 declare version "1.0";
-declare author "K. Barr (Adapted by Facundo Franchino)";
+declare author "K. Barr, Facundo Franchino";
 declare description "nested allpass loop reverb based on Alesis hardware architecture";
 //some utility functions first
 
@@ -16,9 +16,25 @@ prime_list = (
 //helper to get a prime from our list
 get_prime(i) = ba.take(i+1, prime_list);
 
+//add an lfo here
+//lfo= os.osc(0.5) * 10;
 //the allpass filter (corrected for the 1-sample feedback delay)
 //we use de.delay (from standard lib) instead of the old 'delay'
-allpass(N, n, g) = (+ <: (de.delay(N, n-1), *(g))) ~ *(-g) : mem, _ : +;
+//allpass(N, n, g) = (+ <: (de.delay(N, n-1+lfo), *(g))) ~ *(-g) : mem, _ : +;
+
+
+//an lfo section
+//lfo controls
+lfoSpeed = hslider("LFO Speed [unit:Hz]", 0.5, 0.0, 5.0, 0.01) : si.smoo;
+lfoDepth = hslider("LFO Depth [unit:samps]", 10, 0, 50, 0.1) : si.smoo;
+
+//the lfo signal itself (sine)
+lfo = os.osc(lfoSpeed) * lfoDepth;
+
+//the modulated allpass filter
+//we use 'de.fdelay' (fractional delay) here.
+//standard 'de.delay' snaps to integers, which sounds bad when modulating.
+allpass(N, n, g) = (+ <: (de.fdelay(N, n-1+lfo), *(g))) ~ *(-g) : mem, _ : +;
 
 //A "section" consists of 2 allpasses in series + 1 delay
 //this creates a dense smear of the sound
@@ -46,7 +62,6 @@ with {
         //AND we mix in the original input 'x' again!!!
         input_helper(signal_from_prev) = signal_from_prev + input_sig; 
     };
-
     //the feedback path (global feedback)
     //taps the end of the chain and sends it back to the start
     feedback_path = _ : section(get_prime(10), get_prime(11)) : *(feedback_slider);
