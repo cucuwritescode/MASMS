@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modelling and Analysing Sound and Music Systems | A Report</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <main>
+
+        <header class="report-header">
+            <h1>Modelling and Analysing Sound and Music Systems</h1>
+            <p class="author">by [Your Name]</p>
+            <p class="meta">Word Count: approx. 3000</p>
+        </header>
+
+        <section id="introduction">
+            <h2>1. Introduction</h2>
+            <p>This report details the design, implementation, and analysis of a digital audio effect, developed as part of the MASMS module. The focus is on replicating a classic analog synthesis technique using the Faust programming language. We will explore the theoretical underpinnings of the model, from its historical context to its mathematical representation.</p>
+            <p>The goal is to create an efficient and musically useful tool, paying close attention to the nuances of its analog counterpart. This involves analyzing the system's behavior using appropriate measurement techniques and discussing the trade-offs made during the implementation phase. An example of an inline equation is the classic $E = mc^2$, which demonstrates how we can integrate mathematics directly into the text.</p>
+        </section>
+
+        <section id="model">
+            <h2>2. The Model</h2>
+            <p>The chosen audio effect is a variable-state filter, a cornerstone of subtractive synthesis. The theoretical model is based on the work of Moog and Oberheim. The core of the model is a set of coupled first-order differential equations that describe the filter's response.</p>
+            
+            <p>The transfer function for a single filter pole can be described as:</p>
+            $$ H(s) = \frac{1}{1 + \tau s} $$
+            <p>Where $\tau$ represents the time constant of the RC circuit. By cascading four of these stages, we create the classic 24 dB/octave slope. Resonance is introduced by creating a feedback path from the output back to the input, with the feedback amount 'g' controlling the Q factor of the filter.</p>
+
+            <img src="placeholder_diagram.png" alt="A placeholder for a block diagram of the filter model.">
+            <p style="text-align: center; font-style: italic; color: var(--color-secondary);">Figure 1: Placeholder for the filter block diagram.</p>
+        </section>
+
+        <section id="implementation">
+            <h2>3. Implementation</h2>
+            <p>The model was implemented in the <a href="https://faust.grame.fr/">Faust</a> programming language due to its high performance and functional approach to signal processing. The code is structured to be clear, readable, and easily adaptable for different sample rates.</p>
+            <p>Below is a snippet from the Faust implementation showing the core filter ladder. The <code>si.smooth</code> function is used to prevent zipper noise when modulating the cutoff frequency.</p>
+            <pre><code>
+-- Faust Implementation Snippet
+import("stdfaust.lib");
+
+cutoff = hslider("cutoff", 1000, 20, 20000, 0.1) : si.smooth(0.999);
+res = hslider("resonance", 0.5, 0, 4, 0.01);
+
+process = fi.lowpass(4, cutoff, res);
+            </code></pre>
+            <p>The code defines two primary parameters: <code>cutoff</code> and <code>resonance</code>. These are exposed as UI sliders, which will be part of the interactive Wasm module. The final output is processed by a 4-pole lowpass filter from the Faust libraries.</p>
+        </section>
+
+        <section id="interactive-demo">
+            <h2>4. Interactive Faust Demo</h2>
+            <p>To allow for real-time exploration of the filter's characteristics, the Faust code was compiled to WebAssembly (Wasm). The interactive module below allows you to control the filter's parameters and process a built-in noise source.</p>
+            <div id="faust-embed" class="faust-embed">
+                <p>Interactive Faust Wasm module will be embedded here.</p>
+            </div>
+        </section>
+
+        <section id="audio-examples">
+            <h2>5. Audio Examples</h2>
+            <p>The following audio examples demonstrate the filter applied to different source materials. Each example includes a description of the parameter settings used.</p>
+
+            <div class="audio-example">
+                <p><strong>Example 5.1:</strong> White noise sweep. Cutoff frequency is modulated from 20 Hz to 20 kHz with a medium resonance setting (Q ≈ 2).</p>
+                <audio controls src="placeholder_audio_1.wav"></audio>
+            </div>
+
+            <div class="audio-example">
+                <p><strong>Example 5.2:</strong> Synthesizer sawtooth wave. A simple chord is played while the cutoff is manually adjusted to create a classic filter sweep effect.</p>
+                <audio controls src="placeholder_audio_2.wav"></audio>
+            </div>
+        </section>
+
+        <section id="analysis">
+            <h2>6. Analysis</h2>
+            <p>The implementation was analyzed to verify its performance against the theoretical model. This involved measuring its frequency response and impulse response.</p>
+            <p>The plot below shows the frequency response at different resonance settings. We can observe the peak shifting and growing as the Q factor increases, which is consistent with classic ladder filter designs.</p>
+            <div class="placeholder">
+                <p>Placeholder for Spectrogram / Frequency Response Plot Image</p>
+            </div>
+             <p style="text-align: center; font-style: italic; color: var(--color-secondary);">Figure 2: Placeholder for frequency analysis plots.</p>
+
+            <p>Reverberation time (RT60) was also measured to analyze the filter's resonant decay characteristics, which is crucial for emulating the 'ringing' quality of analog filters.</p>
+            <div class="placeholder">
+                <p>Placeholder for RT60 Plot Image</p>
+            </div>
+             <p style="text-align: center; font-style: italic; color: var(--color-secondary);">Figure 3: Placeholder for RT60 analysis.</p>
+        </section>
+
+        <section id="references">
+            <h2>7. References</h2>
+            <ol class="references">
+                <li>Välimäki, V., & Reiss, J. D. (2016). All about the moog ladder filter. <em>Journal of the Audio Engineering Society, 64</em>(1/2), 34-47. [IEEE Style Placeholder]</li>
+                <li>Zölzer, U. (Ed.). (2011). <em>DAFX: digital audio effects.</em> John Wiley & Sons. [IEEE Style Placeholder]</li>
+            </ol>
+        </section>
+
+    </main>
+
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="mathjax/tex-chtml.js"></script>
+    <!-- End MathJax Configuration -->
+</body>
+</html>
