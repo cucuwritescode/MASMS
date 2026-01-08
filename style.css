@@ -154,7 +154,6 @@ img {
   height: auto;
   margin: 0 auto;
   border-radius: 4px;
-  background-color: #fff;
 }
 .placeholder, .faust-embed {
   border: 1px solid var(--colour-border);
@@ -274,7 +273,7 @@ body.light-mode .theme-toggle .moon-icon { display: none; }
 
 /* Section animations */
 .fade-in-section {
-  opacity: 0;
+  opacity: 1;
   transform: translateY(20px);
   transition: opacity 0.6s ease, transform 0.6s ease;
 }

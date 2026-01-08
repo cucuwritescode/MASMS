@@ -55,22 +55,32 @@
 <h3>2.1 The Topology</h3>
 
 <p>
-    The machine consists of four parallel delay lines connected by a feedback matrix. Let us denote the input signal as \( x(n) \) and the output as \( y(n) \). The signal enters the system and is distributed to four delay branches. The output of these branches is mixed using a Hadamard matrix, then fed back to the input.
+    The machine consists of four parallel delay lines connected by a feedback matrix. Let us denote the input signal as $x(n)$ and the output as $y(n)$. The signal enters the system and is distributed to four delay branches. The output of these branches is mixed using a Hadamard matrix, then fed back to the input.
 </p>
 
 <p>
-    The matrix \( M \) is chosen to be orthogonal. This ensures that the energy of the signal is preserved as it circulates. We employ a \( 4 \times 4 \) Hadamard matrix defined recursively. This offers an efficient method of mixing without introducing gain or loss.
+    The matrix $\mathbf{M}$ is chosen to be orthogonal. This property guarantees that the signal energy is strictly preserved as it circulates, rendering the mixing stage lossless. We employ a $4 \times 4$ Hadamard matrix defined recursively, which offers an efficient method of mixing without introducing gain artifacts.
 </p>
 
 <figure style="text-align: center; margin: 2rem 0;">
-    <img src="images/fdn_diagram.png" alt="Block diagram of the Generalised FDN" style="max-width: 100%; border: 1px solid #333;">
-    <figcaption style="color: var(--text-muted); font-style: italic;">Fig 1. Logical arrangement of the four-channel network.</figcaption>
-</figure>
+    <img src="fdn_4x4.png" alt="Block diagram of the Generalised FDN" style="max-width: 110%; border: 1px solid #333;">
+    </figure>
+
+<h4>2.1.1 Stability Condition</h4>
+<p>
+    For the network to remain stable, the feedback loop must not introduce energy gain. This requires the system matrix $\mathbf{A}$ to be lossless (unitary), satisfying:
+</p>
+<p>
+    $ |\text{det}(\mathbf{A})| = 1 \quad \text{and} \quad \mathbf{A}^T \mathbf{A} = \mathbf{I} $
+</p>
+<p>
+    Our choice of a Hadamard matrix $\mathbf{H}_4$ satisfies this condition naturally when normalised by a factor of $1/\sqrt{4}$. This guarantees that the eigenvalues of the closed-loop system lie strictly within the unit circle on the $z$-plane, ensuring infinite stability regardless of the delay lengths chosen.
+</p>
 
 <h3>2.2 The Generalised Branch</h3>
 
 <p>
-    In a standard reverberator, the delay unit is a simple buffer. It holds the sample for \( N \) steps and releases it. This is sufficient for simple echoes but fails to build density.
+    In a standard reverberator, the delay unit is a simple buffer. It holds the sample for $ N $ steps and releases it. This is sufficient for simple echoes but fails to build density.
 </p>
 
 <p>
@@ -90,7 +100,7 @@
 </p>
 
 <p>
-    We also introduce a low-frequency oscillator (LFO) to modulate the delay length \( N \). This prevents the system from resonating at fixed frequencies. It is a necessary deviation from a strictly physical model to achieve a pleasing aesthetic result.
+    We also introduce a low-frequency oscillator (LFO) to modulate the delay length $ N $. This prevents the system from resonating at fixed frequencies. It is a necessary deviation from a strictly physical model to achieve a pleasing aesthetic result.
 </p>
         </section>
 
@@ -216,7 +226,7 @@ process = fdn(4, delays, feedbackMatrix);
     <script>
         window.MathJax = {
             tex: {
-                inlineMath: [['$', '$'], ['\(', '\)']],
+                inlineMath: [['$', '$'], ['$', '$']],
                 displayMath: [['$$', '$$'], ['\[', '\]']]
             },
             svg: {
