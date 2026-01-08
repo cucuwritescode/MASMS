@@ -44,8 +44,54 @@
 
         <section id="introduction" class="fade-in-section">
             <h2>1. Introduction</h2>
-            <p>This report explores the design and implementation of a generalised Feedback Delay Network (FDN) for artificial reverberation, featuring switchable diffusivity and modulation capabilities. Developed in the Faust programming language, this system extends traditional FDN architectures to provide greater flexibility in shaping reverberant characteristics.</p>
-            <p>The implementation addresses key challenges in digital reverberation: achieving natural decay patterns, controlling modal density, and enabling smooth transitions between different diffusion configurations. The system's modulation capabilities introduce time-varying behaviour that enhances the perceived naturalness of the reverberation. The fundamental energy conservation constraint can be expressed as $||\mathbf{A}||_2 \leq 1$, where $\mathbf{A}$ represents the feedback matrix.</p>
+            <p>
+    We may consider the problem of artificial reverberation as one of memory and diffusion. The aim is to store a signal and return it at a later time, altered in such a way that it simulates the complexity of a physical enclosure.
+</p>
+
+<p>
+    The system presented here is a <strong>Generalised Feedback Delay Network (FDN)</strong>. It departs from the standard designs of Stautner and Puckette  by introducing a variable structure within the delay branches. This allows the system to operate in two distinct modes.
+</p>
+
+<h3>2.1 The Topology</h3>
+
+<p>
+    The machine consists of four parallel delay lines connected by a feedback matrix. Let us denote the input signal as \( x(n) \) and the output as \( y(n) \). The signal enters the system and is distributed to four delay branches. The output of these branches is mixed using a Hadamard matrix, then fed back to the input.
+</p>
+
+<p>
+    The matrix \( M \) is chosen to be orthogonal. This ensures that the energy of the signal is preserved as it circulates. We employ a \( 4 \times 4 \) Hadamard matrix defined recursively. This offers an efficient method of mixing without introducing gain or loss.
+</p>
+
+<figure style="text-align: center; margin: 2rem 0;">
+    <img src="images/fdn_diagram.png" alt="Block diagram of the Generalised FDN" style="max-width: 100%; border: 1px solid #333;">
+    <figcaption style="color: var(--text-muted); font-style: italic;">Fig 1. Logical arrangement of the four-channel network.</figcaption>
+</figure>
+
+<h3>2.2 The Generalised Branch</h3>
+
+<p>
+    In a standard reverberator, the delay unit is a simple buffer. It holds the sample for \( N \) steps and releases it. This is sufficient for simple echoes but fails to build density.
+</p>
+
+<p>
+    We propose a modification. We define a <strong>Generalised Branch</strong> that can switch its behaviour.
+</p>
+
+<p>
+    <strong>Mode A (Standard):</strong> The branch acts as a pure delay line.
+    $$ y(n) = x(n - N) $$
+    This is useful for observing the discrete reflections of the system.
+</p>
+
+<p>
+    <strong>Mode B (Allpass):</strong> The branch contains an allpass filter.
+    $$ y(n) = -g \cdot x(n) + x(n-N) + g \cdot y(n-N) $$
+    By circulating the signal through this filter, we increase the number of non-zero samples in the impulse response. The sound is smeared in time. This mimics the rapid diffusion of sound waves hitting irregular walls.
+</p>
+
+<p>
+    We also introduce a low-frequency oscillator (LFO) to modulate the delay length \( N \). This prevents the system from resonating at fixed frequencies. It is a necessary deviation from a strictly physical model to achieve a pleasing aesthetic result.
+</p>
         </section>
 
         <section id="model" class="fade-in-section">
