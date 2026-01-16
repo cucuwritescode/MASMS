@@ -1,5 +1,5 @@
 declare name 		"Switchable Diffusivity Feedback Delay Network";
-declare version 	"1.0";
+declare version 	"1.1";
 declare author 		"Facundo Franchino";
 
 import("stdfaust.lib");
@@ -11,13 +11,13 @@ import("stdfaust.lib");
 mode = hslider("engine mode [style:radio{'standard':0;'allpass':1}]", 0, 0, 1, 1) : int;
 
 t60 = hslider("decay t60 [unit:s]", 2.0, 0.1, 10.0, 0.1);
-damp = hslider("hf damping [0-1]", 0.4, 0, 0.9, 0.01);
+damp = hslider("hf damping [0-1]", 0.45, 0, 0.9, 0.01);
 
 wet = hslider("dry/wet", 0.5, 0, 1, 0.01);
 
-//modulation (only for mode 1)
-modSpeed = hslider("mod speed [hz]", 0.5, 0.01, 5.0, 0.01);
-modDepth = hslider("mod depth [samp]", 10, 0, 50, 0.1);
+//modulation (tuned lower for vocals)
+modSpeed = hslider("mod speed [hz]", 0.2, 0.01, 5.0, 0.01);
+modDepth = hslider("mod depth [samp]", 4, 0, 50, 0.1);
 
 
 //helper functions
@@ -25,15 +25,21 @@ modDepth = hslider("mod depth [samp]", 10, 0, 50, 0.1);
 //air absorption filter
 op(g) = _ : (+ : _ * (1-g)) ~ * (g);
 
+//input diffusion (tuned for smoother onset)
+diffuser = allpass(1021) : allpass(1361)
+with {
+    allpass(N) = (+ <: (de.delay(2048, N), *(-0.5))) ~ *(0.5) : mem, _ : +;
+};
+
 //lossless matrix
 hadamard(2) = si.bus(2) <: +, -;
 hadamard(4) = par(i, 2, hadamard(2)) : ro.interleave(2,2) : par(i, 2, hadamard(2));
 
-//large hall primes (150ms-260ms approx)
-prime(0) = 7919;
-prime(1) = 8819;
-prime(2) = 10201;
-prime(3) = 11549;
+//medium hall primes
+prime(0) = 4001;
+prime(1) = 4799;
+prime(2) = 5647;
+prime(3) = 6521;
 
 
 //generalised branch
@@ -46,8 +52,12 @@ with {
     pathDelay = _@N;
     
     //mode 1, modulated allpass
-    lfo = os.osc(modSpeed) * modDepth;
-    pathAllpass = (+ <: (de.fdelay(65536, N-1+lfo), *(0.5))) ~ *(-0.5) : mem, _ : +;
+    //removed the 1.5x boost to fix vocal "warble"
+    speedOffset = modSpeed + (idx * 0.11);
+    lfo = os.osc(speedOffset) * modDepth;
+    
+    //reduced feedback slightly (0.55) to reduce metallic resonance on vocals
+    pathAllpass = (+ <: (de.fdelay(65536, N-1+lfo), *(0.55))) ~ *(-0.55) : mem, _ : +;
 };
 
 
@@ -73,4 +83,5 @@ with{
 
 stereoToQuad = _,_ <: _,_,_,_;
 
-process = _,_ <: (*(1-wet), *(1-wet)), (stereoToQuad : fdn :> _,_ : *(wet), *(wet)) :> _,_;
+//added diffuser to wet path
+process = _,_ <: (*(1-wet), *(1-wet)), (stereoToQuad : par(i, 4, diffuser) : fdn :> _,_ : *(wet), *(wet)) :> _,_;
